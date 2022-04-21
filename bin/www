@@ -89,5 +89,3 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-/* let ws = require("../ws");
-ws.init(server); */

@@ -6,7 +6,93 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width">
         <style>
-
+            body {
+                margin: 0px;
+                background-color: #222;
+                color: #fff;
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            }
+            header {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 1em 0 1em;
+                text-align: center;
+            }
+            #instructions {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 1em 1em 0 1em;
+            }
+            #instructions p {
+                text-align: justify;
+            }
+            main {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 1em 1em 1em;
+                text-align: center;
+                margin-bottom: 100px;
+            }
+            main div {
+                display: inline-block;
+                padding: 1em;
+                text-align: center;
+            }
+            main div button {
+                width: 100%;
+                margin: 10px 0;
+                padding: 1em;
+                text-align: center;
+            }
+            button {
+                background-color: #444;
+                border: 1px solid #ccc;
+                border-radius: 20px;
+                font-size: 1.2em;
+                color: #fff;
+                text-align: center;
+            }
+            button:hover {
+                background-color: #666;
+            }
+            #next {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: inline-block;
+                margin-top: 2em;
+                padding: 1em;
+                text-align: center;
+            }
+            footer {
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                margin-top: 0px;
+                height: 50px;
+                padding: 1em 0 0.5em 0;
+                text-align: center;
+                background-color: #222;
+                box-shadow: 0 0 20px #000;
+            }
+            /* when screen is larger than  pixels, margin adapts to keep text in the center */
+/*             @media screen and (min-width: 1200px) {
+                header {
+                    padding: 0 6% 0 6%;
+                }
+                #instructions {
+                    padding: 1em 6% 0 6%;
+                }
+                main {
+                    padding: 0 6% 1em 6%;
+                }
+                #next {
+                    margin-top: 2em;
+                    padding: 1em 6% 0 6%;
+                }
+                footer {
+                    padding: 1em 6% 0 6%;
+                } */
+            
         </style>
     </head>
 
@@ -15,25 +101,38 @@
             <h1>camelCase vs. kebab-case</h1>
         </header>
         <div id="instructions">
-            <h2>The following is an example of what you will be encountering during this experiment</h2>
-            <p>Here you will find some words separated by a space, 
-                you will have to click on the button that corresponds to the original sentence
-                written in camelCase or kebab-case. <br>
-                For example, the sentence "hello world" will be:
+            <h2>Welcome to our experiment!</h2>
+            <p><u>Read carefully the instructions before starting,
+                do NOT close or reload the page until you see the ending message
+                or your results will not be saved.</u>
+            </p>
+            <p>Down below you will find an example of what you can encounter during the experiment. <br>
+                There is a short sentence or a pair of words that has to be
+                expressed either in camelCase or kebab-case. <br>
+                You will have to click on the button that corresponds to the
+                original sentence, there is only one correct answer for each question. <br>
+                We keep track of the correctness of your answer and the time taken to click on the button. <br>
+                <br>
+                If you don't know what camelCase or kebab-case means, here is an example. <br>
+                The sentence "hello world" will be:
             </p>
             <ul>
                 <li>helloWorld - in camelCase</li>
                 <li>hello-world - in kebab-case</li>
             </ul>
+            <p>
+                When you are ready click on the Start button at the bottom of the page.
+            </p>
         </div>
         <main>
             <h2 id="sentence"><strong>Example:</strong> has color</h2>
-            <div>
-                <button id="1">hasColor</button>
-                <button id="2">hadColour</button>
-                <button id="3">badCooler</button>
-                <button id="4">sadColer</button>
+            <div id="buttons">
+                <button id="0">hasColor</button>
+                <button id="1">hadColour</button>
+                <button id="2">badCooler</button>
+                <button id="3">sadColer</button>
             </div>
+            <br>
             <button id="next">Start</button>
         </main>
 
@@ -42,10 +141,100 @@
         </footer>
 
         <script>
+            let remaining = 1;
+            let begin;
+            let end;
+            let time = [];
             const list = [
-                
+                {
+                    type: 'camelCase',
+                    sentence: 'has color',
+                    answer: 'hasColor',
+                    wrong: ['hadColour', 'badCooler', 'sadColer']
+                }
             ]
+            document.getElementById('next').addEventListener('click', next)
+            function next() {
+                console.log(remaining, time)
+                if (remaining <= 0) {
+                    fetch('/post', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(time)
+                    });
+                    document.getElementById('sentence').innerHTML = '<strong>End of the experiment</strong><br><br>Thank you for your participation!';
+                    document.getElementById('buttons').remove();
+                    document.getElementById('next').remove();
+                    window.onbeforeunload = null;
+                    return;
+                }
+                if (document.getElementById('instructions')){
+                    document.getElementById('instructions').remove()
+                    document.querySelector('main').style.padding = '1em'
+                    window.onbeforeunload = function (e) {
+                        e = e || window.event;
+                        if (e) {
+                            e.returnValue = 'Sure?';
+                        }
+                        return 'Sure?';
+                    };
+                }
+                let next = document.getElementById('next');
+                next.innerText = 'Next';
+                next.parentNode.appendChild(next.cloneNode(true));
+                /* add event listeners and edit sentence and buttons */
+                let n = take_random_item();
+                document.getElementById('sentence').innerText = list[n].sentence;
+                let answers = [];
+                list[n].wrong.forEach(e => {
+                    answers.push(e);
+                });
+                answers.splice(Math.floor(Math.random() * 4), 0, list[n].answer);
+                for (let i = 0; i < 4; i++) {
+                    let e = document.getElementById(i);
+                    e.innerText = answers[i];
+                    e.addEventListener('click', activate_next);
+                }
+                next.parentNode.removeChild(next);
+                remaining--;
+                begin = performance.now();
+            }
+            function activate_next() {
+                end = performance.now();
+                // initiate object
+                let obj = {};
+                // disable event listeners
+                for (let i = 0; i < 4; i++) {
+                    let e = document.getElementById(i);
+                    e.parentNode.appendChild(e.cloneNode(true));
+                    e.parentNode.removeChild(e);
+                }
+                // look for the answer
+                let sentence = document.getElementById('sentence').innerText;
+                console.log(end - begin);
+                list.forEach(e => {
+                    if (e.sentence == sentence) {
+                        obj.type = e.type;
+                        obj.time = end - begin;
+                        if (this.innerText == e.answer) {
+                            obj.right = true;
+                        } else {
+                            obj.right = false;
+                        }
+                        time.push(obj);
+                        console.log(obj);
+                    }
+                })
+                // add event listener to next button
+                document.getElementById('next').addEventListener('click', next);
 
+            }
+            function take_random_item() {
+                return Math.floor(Math.random() * list.length);
+            }
+            
         </script>
        
     </body>
