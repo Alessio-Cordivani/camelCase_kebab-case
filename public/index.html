@@ -13,13 +13,13 @@
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             }
             header {
-                max-width: 1200px;
+                max-width: 1080px;
                 margin: 0 auto;
                 padding: 0 1em 0 1em;
                 text-align: center;
             }
             #instructions {
-                max-width: 1200px;
+                max-width: 1080px;
                 margin: 0 auto;
                 padding: 1em 1em 0 1em;
             }
@@ -27,7 +27,7 @@
                 text-align: justify;
             }
             main {
-                max-width: 1200px;
+                max-width: 1080px;
                 margin: 0 auto;
                 padding: 0 1em 1em 1em;
                 text-align: center;
@@ -56,7 +56,7 @@
                 background-color: #666;
             }
             #next {
-                max-width: 1200px;
+                max-width: 1080px;
                 margin: 0 auto;
                 display: inline-block;
                 margin-top: 2em;
@@ -74,25 +74,6 @@
                 background-color: #222;
                 box-shadow: 0 0 20px #000;
             }
-            /* when screen is larger than  pixels, margin adapts to keep text in the center */
-/*             @media screen and (min-width: 1200px) {
-                header {
-                    padding: 0 6% 0 6%;
-                }
-                #instructions {
-                    padding: 1em 6% 0 6%;
-                }
-                main {
-                    padding: 0 6% 1em 6%;
-                }
-                #next {
-                    margin-top: 2em;
-                    padding: 1em 6% 0 6%;
-                }
-                footer {
-                    padding: 1em 6% 0 6%;
-                } */
-            
         </style>
     </head>
 
@@ -141,7 +122,7 @@
         </footer>
 
         <script>
-            let remaining = 1;
+            let remaining = 4;
             let begin;
             let end;
             let time = [];
@@ -151,11 +132,16 @@
                     sentence: 'has color',
                     answer: 'hasColor',
                     wrong: ['hadColour', 'badCooler', 'sadColer']
+                },
+                {
+                    type: 'kebab-case',
+                    sentence: 'has no color',
+                    answer: 'has-no-color',
+                    wrong: ['had-on-colour', 'bad-no-cooler', 'sad-no-coler']
                 }
             ]
             document.getElementById('next').addEventListener('click', next)
             function next() {
-                console.log(remaining, time)
                 if (remaining <= 0) {
                     fetch('/post', {
                         method: 'POST',
@@ -213,7 +199,6 @@
                 }
                 // look for the answer
                 let sentence = document.getElementById('sentence').innerText;
-                console.log(end - begin);
                 list.forEach(e => {
                     if (e.sentence == sentence) {
                         obj.type = e.type;
@@ -224,7 +209,6 @@
                             obj.right = false;
                         }
                         time.push(obj);
-                        console.log(obj);
                     }
                 })
                 // add event listener to next button
@@ -232,7 +216,8 @@
 
             }
             function take_random_item() {
-                return Math.floor(Math.random() * list.length);
+                let n = Math.floor(Math.random() * (list.length / 2)) + 1;
+                return n * (remaining % 2 + 1) - 1;
             }
             
         </script>
