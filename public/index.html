@@ -125,6 +125,7 @@
             let remaining = 10;
             let begin;
             let end;
+            let previous_type = '';
             let time = [];
             const list = [
                 {
@@ -805,8 +806,16 @@
 
             }
             function take_random_item() {
-                let n = Math.floor(Math.random() * (list.length / 2)) + 1;
-                return n * (remaining % 2 + 1) - 1;
+                //let n = Math.floor(Math.random() * (list.length / 2)) + 1;
+                let n = Math.floor(Math.random() * list.length);
+                let type = list[n].type;
+                if (type != previous_type) {
+                    previous_type = type;
+                    return n;
+                } else {
+                    return take_random_item();
+                }
+                //return n * (remaining % 2 ) - 1;
             }
             
         </script>
