@@ -53,7 +53,7 @@
                 text-align: center;
             }
             button:hover {
-                background-color: #666;
+                background-color: rgb(0, 0, 0);
             }
             #next {
                 max-width: 1080px;
@@ -73,6 +73,9 @@
                 text-align: center;
                 background-color: #222;
                 box-shadow: 0 0 20px #000;
+            }
+            .selected {
+                background-color: #000;
             }
         </style>
     </head>
@@ -769,6 +772,7 @@
                 answers.splice(Math.floor(Math.random() * 4), 0, list[n].answer);
                 for (let i = 0; i < 4; i++) {
                     let e = document.getElementById(i);
+                    e.className = '';
                     e.innerText = answers[i];
                     e.addEventListener('click', activate_next);
                 }
@@ -778,6 +782,8 @@
             }
             function activate_next() {
                 end = performance.now();
+                //change the color of the selected answer
+                this.className = 'selected';
                 // initiate object
                 let obj = {};
                 // disable event listeners
